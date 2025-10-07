@@ -1,0 +1,236 @@
+﻿@model IEnumerable<LuckDraw.Models.LKD_LuckyDraw>
+
+@{
+    ViewBag.Title = "Lucky Draw List";
+}
+
+<main style="color:black">
+    <!-- Nút để mở modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createLuckyDrawModal">
+        Create New Lucky Draw
+    </button>
+
+    <!-- Modal popup create -->
+    <div class="modal fade" id="createLuckyDrawModal" tabindex="-1" role="dialog" aria-labelledby="createLuckyDrawModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createLuckyDrawModalLabel">Create New Lucky Draw</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @using (Html.BeginForm("Create", "LuckyDraw", FormMethod.Post, new { id = "createLuckyDrawForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="form-group">
+                            <label for="NameLuckyDraw">Name</label>
+                            @Html.TextBoxFor(m => m.FirstOrDefault().NameLuckyDraw, new { @class = "form-control", required = "required" })
+                            @Html.ValidationMessage("NameLuckyDraw", "", new { @class = "text-danger" })
+                        </div>
+
+                        <button type="submit" class="btn btn-success">Create</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal popup delete -->
+    <div class="modal fade" id="deleteLuckyDrawModal" tabindex="-1" role="dialog" aria-labelledby="deleteLuckyDrawModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteLuckyDrawModalLabel">Confirm Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete the lucky draw "<span id="deleteLuckyDrawName"></span>"?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal popup edit -->
+    <div class="modal fade" id="editLuckyDrawModal" tabindex="-1" role="dialog" aria-labelledby="editLuckyDrawModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editLuckyDrawModalLabel">Edit Lucky Draw</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @using (Html.BeginForm("Edit", "LuckyDraw", FormMethod.Post, new { id = "editLuckyDrawForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.Hidden("Id") <!-- Hidden field để lưu ID -->
+                        <div class="form-group">
+                            <label for="NameLuckyDraw">Name</label>
+                            @Html.TextBox("NameLuckyDraw", null, new { @class = "form-control", required = "required", id = "editNameLuckyDraw" })
+                            @Html.ValidationMessage("NameLuckyDraw", "", new { @class = "text-danger" })
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách vòng quay -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.NameLuckyDraw</td>
+                    <td>
+                        <a href="#" class="edit-link" data-id="@item.Id" data-name="@item.NameLuckyDraw">Edit</a> |
+                        <a href="#" class="delete-link" data-id="@item.Id" data-name="@item.NameLuckyDraw">Delete</a> |
+                        @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</main>
+
+@section scripts {
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- jQuery Validation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/additional-methods.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Validate form
+            $("#createLuckyDrawForm").validate({
+                rules: {
+                    NameLuckyDraw: {
+                        required: true,
+                        maxlength: 100
+                    }
+                },
+                messages: {
+                    NameLuckyDraw: {
+                        required: "Please enter a name for the lucky draw",
+                        maxlength: "Name cannot exceed 100 characters"
+                    }
+                },
+                submitHandler: function (form) {
+                    // Gửi form qua AJAX
+                    $.ajax({
+                        url: form.action,
+                        type: form.method,
+                        data: $(form).serialize(),
+                        success: function (response) {
+                            if (response.success) {
+                                // Đóng modal và làm mới trang
+                                $("#createLuckyDrawModal").modal("hide");
+                                location.reload();
+                            } else {
+                                alert("Error: " + response.message);
+                            }
+                        },
+                        error: function () {
+                            alert("An error occurred while creating the lucky draw.");
+                        }
+                    });
+                }
+            });
+        });
+
+        // ----- Delete modal -----
+    $(".delete-link").click(function () {
+        var id = $(this).data("id");
+        var name = $(this).data("name");
+        $("#deleteLuckyDrawName").text(name);
+        $("#confirmDelete").data("id", id);
+        $("#deleteLuckyDrawModal").modal("show");
+    });
+
+    $("#confirmDelete").click(function () {
+        var id = $(this).data("id");
+        var token = $('input[name="__RequestVerificationToken"]').val();
+
+        $.ajax({
+            url: '@Url.Action("Delete", "LuckyDraw")',
+            type: "POST",
+            data: { id: id, __RequestVerificationToken: token },
+            success: function (response) {
+                if (response.success) {
+                    $("#deleteLuckyDrawModal").modal("hide");
+                    location.reload();
+                } else {
+                    alert("Error: " + response.message);
+                }
+            },
+            error: function (xhr) {
+                alert("Delete failed: " + xhr.status + " " + xhr.statusText);
+            }
+        });
+    });
+
+        // Edit modal
+        $(".edit-link").click(function () {
+            var id = $(this).data("id");
+            var name = $(this).data("name");
+            $("#editLuckyDrawModal #Id").val(id);
+            $("#editLuckyDrawModal #editNameLuckyDraw").val(name);
+            $("#editLuckyDrawModal").modal("show");
+        });
+
+        $("#editLuckyDrawForm").validate({
+            rules: {
+                NameLuckyDraw: {
+                    required: true,
+                    maxlength: 100
+                }
+            },
+            messages: {
+                NameLuckyDraw: {
+                    required: "Please enter a name for the lucky draw",
+                    maxlength: "Name cannot exceed 100 characters"
+                }
+            },
+            submitHandler: function (form) {
+                $.ajax({
+                    url: form.action,
+                    type: form.method,
+                    data: $(form).serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            $("#editLuckyDrawModal").modal("hide");
+                            location.reload();
+                        } else {
+                            alert("Error: " + response.message);
+                        }
+                    },
+                    error: function () {
+                        alert("An error occurred while editing the lucky draw.");
+                    }
+                });
+            }
+        });
+    </script>
+}

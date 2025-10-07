@@ -1,0 +1,68 @@
+﻿@model LuckDraw.Models.LKD_LuckyDraw
+
+@{
+    ViewBag.Title = "Lucky Draw Details";
+}
+
+<div class="container" style="color:black">
+    <div class="row">
+        <div class="col-md-12">
+            <h3>@Model.NameLuckyDraw</h3>
+            <hr />
+
+            <h4>Candidates</h4>
+            @if (Model.Candidates != null && Model.Candidates.Any())
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Department</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var candidate in Model.Candidates)
+                        {
+                            <tr>
+                                <td>@candidate.FullName</td>
+                                <td>@candidate.Department</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No candidates available.</p>
+            }
+
+            <h4>Prizes</h4>
+            @if (Model.Prizes != null && Model.Prizes.Any())
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Prize Name</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var prize in Model.Prizes)
+                        {
+                            <tr>
+                                <td>@prize.NamePrize</td>
+                                <td>@prize.Quantity</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No prizes available.</p>
+            }
+
+            <a href="@Url.Action("LuckyDrawList", "LuckyDraw")" class="btn btn-primary">Back to List</a>
+        </div>
+    </div>
+</div>

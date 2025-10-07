@@ -1,0 +1,289 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Draw - 幸運抽獎</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            height: 60px;
+            max-width: 100%;
+        }
+
+        .navbar-brand {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar-menu {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+            .nav-link:hover {
+                background: rgba(255, 255, 255, 0.1);
+                color: #fff;
+                transform: translateY(-2px);
+            }
+
+            .nav-link i {
+                font-size: 1.1rem;
+            }
+
+        /* Mobile Toggle Button */
+        .navbar-toggler {
+            display: none;
+            flex-direction: column;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+            .navbar-toggler span {
+                width: 25px;
+                height: 3px;
+                background: #fff;
+                margin: 3px 0;
+                border-radius: 2px;
+                transition: all 0.3s ease;
+            }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            width: 100%;
+            background: #f5f5f5;
+            padding: 3rem 0;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            color: #fff;
+        }
+
+            .content-wrapper h1 {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .content-wrapper > p {
+                font-size: 1.25rem;
+                margin-bottom: 2rem;
+                opacity: 0.9;
+            }
+
+        .content-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+            .content-section h2 {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+            }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 1.1rem 0;
+            width: 100%;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .navbar-container {
+                padding: 0 1rem;
+                flex-wrap: wrap;
+            }
+
+            .navbar-toggler {
+                display: flex;
+            }
+
+            .navbar-menu {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                padding: 1rem 0;
+                gap: 0;
+            }
+
+                .navbar-menu.active {
+                    display: flex;
+                }
+
+            .nav-item {
+                width: 100%;
+            }
+
+            .nav-link {
+                width: 100%;
+                padding: 1rem 1.25rem;
+                border-radius: 0;
+            }
+
+            .content-wrapper h1 {
+                font-size: 2rem;
+            }
+
+            .content-wrapper > p {
+                font-size: 1rem;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+
+            .content-wrapper {
+                padding: 0 1rem;
+            }
+
+            .content-section {
+                padding: 1.5rem;
+            }
+        }
+
+        .modal-dialog {
+            max-width: 500px;
+            margin: 1.75rem auto;
+        }
+
+        .modal-content {
+            border-radius: 10px;
+        }
+
+        .modal-header {
+            background-color: #007bff;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">Lucky Draw</div>
+            @*<button class="navbar-toggler" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>*@
+            <ul class="navbar-menu" id="navMenu">
+                <li class="nav-item">
+                    <a href="@Url.Action("LuckyDrawList","LuckyDraw")" class="nav-link">
+                        <i class="bi bi-people-fill"></i> 候選名單
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#prizes" class="nav-link">
+                        <i class="bi bi-trophy-fill"></i> 獎項名單
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#draw" class="nav-link">
+                        <i class="bi bi-dice-5-fill"></i> 抽一把
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#results" class="nav-link">
+                        <i class="bi bi-card-list"></i> 顯示抽獎結果
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#settings" class="nav-link">
+                        <i class="bi bi-gear-fill"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <main class="main-content">
+        <div class="content-wrapper">
+            <div class="container body-content">
+                @RenderBody()
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 - Designed by Tung.Bui</p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>
