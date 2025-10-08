@@ -42,7 +42,7 @@
         }
 
         .navbar-brand {
-            color: #fff;
+            color: #fff !important;
             font-size: 1.5rem;
             font-weight: 700;
             text-decoration: none;
@@ -234,22 +234,19 @@
 <body>
     <nav class="navbar">
         <div class="navbar-container">
-            <div class="navbar-brand">Lucky Draw</div>
-            @*<button class="navbar-toggler" id="navToggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>*@
+            <a href="@Url.Action("LuckyDrawList", "LuckyDraw")" class="navbar-brand" style="text-decoration:none; color:inherit;">
+                Lucky Draw
+            </a>
             <ul class="navbar-menu" id="navMenu">
                 <li class="nav-item">
-                    <a href="@Url.Action("LuckyDrawList","LuckyDraw")" class="nav-link">
-                        <i class="bi bi-people-fill"></i> 候選名單
-                    </a>
+                    <button type="button" class="nav-link btn" id="candidateListBtn" data-toggle="modal" data-target="#candidateModal">
+                        候選名單
+                    </button>
                 </li>
                 <li class="nav-item">
-                    <a href="#prizes" class="nav-link">
-                        <i class="bi bi-trophy-fill"></i> 獎項名單
-                    </a>
+                    <button type="button" class="nav-link btn" id="prizeListBtn" data-toggle="modal" data-target="#prizeModal">
+                        獎項名單
+                    </button>
                 </li>
                 <li class="nav-item">
                     <a href="#draw" class="nav-link">

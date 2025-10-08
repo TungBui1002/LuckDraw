@@ -3,14 +3,12 @@
 @{
     ViewBag.Title = "Lucky Draw Details";
 }
-
 <div class="container" style="color:black">
     <div class="row">
         <div class="col-md-12">
             <h3>@Model.NameLuckyDraw</h3>
-            <hr />
 
-            <h4>Candidates</h4>
+            @*Candidates*@
             @if (Model.Candidates != null && Model.Candidates.Any())
             {
                 <table class="table">
@@ -36,33 +34,213 @@
                 <p>No candidates available.</p>
             }
 
-            <h4>Prizes</h4>
-            @if (Model.Prizes != null && Model.Prizes.Any())
-            {
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Prize Name</th>
-                            <th>Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var prize in Model.Prizes)
-                        {
-                            <tr>
-                                <td>@prize.NamePrize</td>
-                                <td>@prize.Quantity</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p>No prizes available.</p>
-            }
-
             <a href="@Url.Action("LuckyDrawList", "LuckyDraw")" class="btn btn-primary">Back to List</a>
         </div>
     </div>
+
+    <!-- Candidate List Modal -->
+    <div class="modal fade" id="candidateModal" tabindex="-1" role="dialog" aria-labelledby="candidateModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="candidateModalLabel">Candidate List</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Add Form -->
+                    <div class="form-inline mb-3">
+                        <input type="text" id="newFullName" class="form-control mr-2" placeholder="Full name" />
+                        <input type="text" id="newDepartment" class="form-control mr-2" placeholder="Department" />
+                        <button id="addCandidateBtn" class="btn btn-success btn-sm">Add</button>
+                    </div>
+
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Department</th>
+                                <th style="width: 100px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="candidateBody">
+                            <tr><td colspan="3">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Prize List -->
+    <div class="modal fade" id="prizeModal" tabindex="-1" role="dialog" aria-labelledby="prizeModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="prizeModalLabel">Prize List</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table" id="prizeTable">
+                        <thead>
+                            <tr>
+                                <th>Prize Name</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prizeBody">
+                            <tr><td colspan="2">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Lấy id trực tiếp từ Razor Model
+            var luckyDrawId = @Model.Id;
+
+             // 🟦 Load danh sách ứng viên
+            $("#candidateListBtn").click(function () {
+                loadCandidates();
+            });
+
+            function loadCandidates() {
+                $("#candidateBody").html('<tr><td colspan="3">Loading...</td></tr>');
+                $.ajax({
+                    url: '@Url.Action("GetCandidates", "Candidate")',
+                    type: "GET",
+                    data: { id: luckyDrawId },
+                    success: function (response) {
+                        $("#candidateBody").empty();
+                        if (response && response.length > 0) {
+                            $.each(response, function (index, c) {
+                                $("#candidateBody").append(`
+                                    <tr data-id="${c.Id}">
+                                        <td><input type="text" class="form-control fullName" value="${c.FullName}" readonly></td>
+                                        <td><input type="text" class="form-control dept" value="${c.Department}" readonly></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary edit-btn">✏️</button>
+                                            <button class="btn btn-sm btn-outline-danger delete-btn">🗑️</button>
+                                        </td>
+                                    </tr>
+                                `);
+                            });
+                        } else {
+                            $("#candidateBody").append('<tr><td colspan="3">No candidates available.</td></tr>');
+                        }
+                    },
+                    error: function () {
+                        $("#candidateBody").html('<tr><td colspan="3">Error loading candidates.</td></tr>');
+                    }
+                });
+            }
+
+            // Thêm ứng viên mới
+            $("#addCandidateBtn").click(function () {
+                var fullName = $("#newFullName").val().trim();
+                var dept = $("#newDepartment").val().trim();
+
+                if (!fullName || !dept) {
+                    alert("Please enter both Full Name and Department.");
+                    return;
+                }
+
+                $.post('@Url.Action("Create", "Candidate")',
+                    { luckyDrawId: luckyDrawId, fullName: fullName, department: dept },
+                    function (res) {
+                        if (res.success) {
+                            $("#newFullName, #newDepartment").val("");
+                            loadCandidates();
+                        } else {
+                            alert("Add failed: " + res.message);
+                        }
+                    }
+                );
+            });
+
+            // Sửa ứng viên
+            $(document).on("click", ".edit-btn", function () {
+                var row = $(this).closest("tr");
+                var isEditing = row.find(".fullName").is("[readonly]") === false;
+
+                if (!isEditing) {
+                    // Chuyển sang chế độ chỉnh sửa
+                    row.find(".fullName, .dept").prop("readonly", false).addClass("border-warning");
+                    $(this).text("💾");
+                } else {
+                    // Lưu lại
+                    var id = row.data("id");
+                    var fullName = row.find(".fullName").val();
+                    var dept = row.find(".dept").val();
+
+                    $.post('@Url.Action("Edit", "Candidate")',
+                        { id: id, fullName: fullName, department: dept },
+                        function (res) {
+                            if (res.success) {
+                                row.find(".fullName, .dept").prop("readonly", true).removeClass("border-warning");
+                                row.find(".edit-btn").text("✏️");
+                            } else {
+                                alert("Update failed: " + res.message);
+                            }
+                        }
+                    );
+                }
+            });
+
+            // Xóa ứng viên
+            $(document).on("click", ".delete-btn", function () {
+                if (!confirm("Are you sure you want to delete this candidate?")) return;
+
+                var id = $(this).closest("tr").data("id");
+                $.post('@Url.Action("Delete", "Candidate")', { id: id }, function (res) {
+                    if (res.success) {
+                        loadCandidates();
+                    } else {
+                        alert("Delete failed: " + res.message);
+                    }
+                });
+            });
+
+            // Khi bấm nút hiển thị Prize List
+            $("#prizeListBtn").click(function () {
+                $("#prizeBody").html('<tr><td colspan="2">Loading...</td></tr>');
+                $.ajax({
+                    url: '@Url.Action("GetPrizes", "Prizes")',
+                    type: "GET",
+                    data: { id: luckyDrawId },
+                    success: function (response) {
+                        $("#prizeBody").empty();
+                        if (response && response.length > 0) {
+                            $.each(response, function (index, prize) {
+                                $("#prizeBody").append(
+                                    `<tr><td>${prize.NamePrize}</td><td>${prize.Quantity}</td></tr>`
+                                );
+                            });
+                        } else {
+                            $("#prizeBody").append('<tr><td colspan="2">No prizes available.</td></tr>');
+                        }
+                    },
+                    error: function () {
+                        $("#prizeBody").html('<tr><td colspan="2">Error loading prizes.</td></tr>');
+                    }
+                });
+            });
+        });
+    </script>
+}
