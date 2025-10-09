@@ -31,5 +31,66 @@ namespace LuckDraw.Controllers
                 return Json(new { error = true, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
+
+        [HttpPost]
+        public JsonResult Create(int luckyDrawId, string namePrize, int quantity)
+        {
+            try
+            {
+                var prize = new LKD_Prize
+                {
+                    LuckyDrawId = luckyDrawId,
+                    NamePrize = namePrize,
+                    Quantity = quantity
+                };
+                db.LKD_Prizes.Add(prize);
+                db.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            { 
+                return Json (new {success = false, message = ex.Message});
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Edit(int id, string namePrize, int quantity)
+        {
+            try
+            {
+                var prize = db.LKD_Prizes.Find(id);
+                if (prize == null)
+                    return Json(new { success = false, message = "Prize not found" });
+
+                prize.NamePrize = namePrize;
+                prize.Quantity = quantity;
+                db.SaveChanges();
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Delete(int id)
+        {
+            try
+            {
+                var prize = db.LKD_Prizes.Find(id);
+                if (prize == null)
+                    return Json(new { success = false, message = "Prize not found" });
+
+                db.LKD_Prizes.Remove(prize);
+                db.SaveChanges();
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }
