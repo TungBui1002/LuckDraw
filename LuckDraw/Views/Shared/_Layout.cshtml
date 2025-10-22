@@ -14,6 +14,11 @@
             box-sizing: border-box;
         }
 
+        .content-wrapper.full-width {
+            max-width: none !important;
+            width: 100% !important;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
@@ -108,7 +113,6 @@
             flex: 1;
             width: 100%;
             background: #f5f5f5;
-            padding: 3rem 0;
         }
 
         .content-wrapper {
@@ -239,13 +243,13 @@
             </a>
             <ul class="navbar-menu" id="navMenu">
                 <li class="nav-item">
-                    <button type="button" class="nav-link btn" id="candidateListBtn" data-toggle="modal" data-target="#candidateModal">
-                        候選名單
+                    <button type="button" class="nav-link btn d-flex align-items-center" id="candidateListBtn" data-toggle="modal" data-target="#candidateModal">
+                        <i class="bi bi-people-fill mr-1"></i> 候選名單
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button type="button" class="nav-link btn" id="prizeListBtn" data-toggle="modal" data-target="#prizeModal">
-                        獎項名單
+                    <button type="button" class="nav-link btn d-flex align-items-center" id="prizeListBtn" data-toggle="modal" data-target="#prizeModal">
+                        <i class="bi bi-gift-fill mr-1"></i> 獎項名單
                     </button>
                 </li>
                 <li class="nav-item">
@@ -267,8 +271,8 @@
         </div>
     </nav>
     <main class="main-content">
-        <div class="content-wrapper">
-            <div class="container body-content">
+        <div class="content-wrapper" @(ViewBag.FullWidth == true ? "full-width" : "") ">
+            <div class="container-fluid body-content">
                 @RenderBody()
             </div>
         </div>

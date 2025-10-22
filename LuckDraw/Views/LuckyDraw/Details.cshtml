@@ -1,129 +1,111 @@
 ﻿@model LuckDraw.Models.LKD_LuckyDraw
-
 @{
     ViewBag.Title = "Lucky Draw Details";
 }
-<div class="container" style="color:black">
-    <div class="row">
-        <div class="col-md-12">
-            <h3>@Model.NameLuckyDraw</h3>
 
-            @*Candidates*@
-            @if (Model.Candidates != null && Model.Candidates.Any())
-            {
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Full Name</th>
-                            <th>Department</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var candidate in Model.Candidates)
-                        {
-                            <tr>
-                                <td>@candidate.FullName</td>
-                                <td>@candidate.Department</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p>No candidates available.</p>
-            }
+<style>
+    .container-fluid {
+        width: 100vw !important;
+        margin-left: calc(-50vw + 50%) !important;
+        margin-right: calc(-50vw + 50%) !important;
+        padding: 0 !important;
+        color: black;
+    }
 
-            <a href="@Url.Action("LuckyDrawList", "LuckyDraw")" class="btn btn-primary">Back to List</a>
-        </div>
+    .candidate-section {
+        max-width: none !important;
+        width: 100% !important;
+        margin: 0;
+        padding: 40px 60px;
+    }
+    /* Grid layout full width */
+    .candidate-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+        justify-items: center;
+    }
+
+    /* Card style */
+    .candidate-card {
+        background: #fae9d9;
+        border-radius: 10px;
+        padding: 18px 12px;
+        width: 150px;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+    }
+
+        .candidate-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+    /* Tên */
+    .candidate-name {
+        font-weight: 700;
+        font-size: 16px;
+        color: #000;
+    }
+
+    /* Bộ phận */
+    .candidate-dept {
+        font-size: 13px;
+        color: #555;
+        margin-top: 5px;
+    }
+
+</style>
+
+<div class="container-fluid" style="color:black; padding:40px 60px;">
+    <div class="candidate-section">
+        <h3>@Model.NameLuckyDraw</h3>
+
+        <!-- Candidate preview table -->
+        @if (Model.Candidates != null && Model.Candidates.Any())
+        {
+            <div class="candidate-grid">
+                @foreach (var c in Model.Candidates)
+                {
+                    <div class="candidate-card">
+                        <div class="candidate-name">@c.FullName</div>
+                        <div class="candidate-dept">@c.Department</div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p>No candidates available.</p>
+        }
+
+        <a href="@Url.Action("LuckyDrawList", "LuckyDraw")" class="btn btn-primary" style="margin-top:50px">
+            Back to List
+        </a>
     </div>
 </div>
+</div>
 
-    <!-- Candidate List Modal -->
-    <div class="modal fade" id="candidateModal" tabindex="-1" role="dialog" aria-labelledby="candidateModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="candidateModalLabel">Candidate List</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+<!-- Import Partial Modals -->
+@Html.Partial("_CandidateModal")
+@Html.Partial("_PrizeModal")
 
-                <div class="modal-body">
-                    <!-- Add Form -->
-                    <div class="form-inline mb-3">
-                        <input type="text" id="newFullName" class="form-control mr-2" placeholder="Full name" />
-                        <input type="text" id="newDepartment" class="form-control mr-2" placeholder="Department" />
-                        <button id="addCandidateBtn" class="btn btn-success btn-sm">Add</button>
-                    </div>
-
-                    <table class="table table-bordered">
-                        <thead class="thead-light">
-                            <tr>
-                                <th>Full Name</th>
-                                <th>Department</th>
-                                <th style="width: 105px;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="candidateBody">
-                            <tr><td colspan="3">Loading...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal for Prize List -->
-    <div class="modal fade" id="prizeModal" tabindex="-1" role="dialog" aria-labelledby="prizeModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="prizeModalLabel">Prize List</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="text-right mb-3">
-                        <input type="text" id="newPrizeName" placeholder="Prize name" class="form-control d-inline w-50" />
-                        <input type="number" id="newPrizeQty" placeholder="Qty" class="form-control d-inline w-25" />
-                        <button id="addPrizeBtn" class="btn btn-success btn-sm">Add</button>
-                    </div>
-                    <table class="table" id="prizeTable">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Quantity</th>
-                                <th style="width: 105px;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="prizeBody">
-                            <tr><td colspan="3">Loading...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+<!--External JS config -->
 @section scripts {
     <script>
+        // Shared LuckyDraw ID
         var luckyDrawId = @Model.Id;
+
+        // API endpoints for AJAX
         var candidateUrls = {
             get: '@Url.Action("GetCandidates", "Candidate")',
             create: '@Url.Action("Create", "Candidate")',
             edit: '@Url.Action("Edit", "Candidate")',
             delete: '@Url.Action("Delete", "Candidate")'
         };
+
         var prizeUrls = {
             get: '@Url.Action("GetPrizes", "Prizes")',
             create: '@Url.Action("Create", "Prizes")',
@@ -132,5 +114,6 @@
         };
     </script>
 
+    <!-- Main logic -->
     <script src="~/Scripts/LuckyDraw/Details.js"></script>
 }

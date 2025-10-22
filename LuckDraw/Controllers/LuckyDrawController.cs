@@ -91,6 +91,7 @@ namespace LuckDraw.Controllers
                 {
                 return HttpNotFound();
             }
+            ViewBag.FullWidth = true;
             return View(luckyDraw);
         }
 
