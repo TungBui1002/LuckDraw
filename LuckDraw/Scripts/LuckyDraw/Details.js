@@ -8,10 +8,11 @@ $(document).ready(function () {
 
     function loadCandidates() {
         $("#candidateBody").html('<tr><td colspan="3">Loading...</td></tr>');
-        $.ajax({
+        return $.ajax({
             url: candidateUrls.get,
             type: "GET",
             data: { id: luckyDrawId },
+            cache: false,
             success: function (response) {
                 $("#candidateBody").empty();
                 if (response && response.length > 0) {
@@ -52,7 +53,9 @@ $(document).ready(function () {
             function (res) {
                 if (res.success) {
                     $("#newFullName, #newDepartment").val("");
-                    loadCandidates();
+                    loadCandidates().done(function () {
+                        refreshCandidateCards();
+                    });
                 } else {
                     alert("Add failed: " + res.message);
                 }
@@ -81,6 +84,9 @@ $(document).ready(function () {
                     if (res.success) {
                         row.find(".fullName, .dept").prop("readonly", true).removeClass("border-warning");
                         row.find(".edit-btn").text("✏️");
+                        loadCandidates().done(function () {
+                            refreshCandidateCards();
+                        });
                     } else {
                         alert("Update failed: " + res.message);
                     }
@@ -96,12 +102,50 @@ $(document).ready(function () {
         var id = $(this).closest("tr").data("id");
         $.post(candidateUrls.delete, { id: id }, function (res) {
             if (res.success) {
-                loadCandidates();
+                loadCandidates().done(function () {
+                    refreshCandidateCards();
+                });
             } else {
                 alert("Delete failed: " + res.message);
             }
         });
     });
+
+    //Refresh Candidate Cards immediately after any CRUD operation
+    function refreshCandidateCards() {
+        var grid = $(".candidate-grid");
+        if (grid.length === 0) {
+            console.warn("Candidate grid not found.");
+            return;
+        }
+
+        $.ajax({
+            url: candidateUrls.get,
+            type: "GET",
+            data: { id: luckyDrawId },
+            cache: false,
+            success: function (response) {
+                grid.empty();
+
+                if (response && response.length > 0) {
+                    $.each(response, function (index, c) {
+                        grid.append(`
+                        <div class="candidate-card">
+                            <div class="candidate-name">${c.FullName}</div>
+                            <div class="candidate-dept">${c.Department}</div>
+                        </div>
+                    `);
+                    });
+                } else {
+                    grid.html("<p>No candidates available.</p>");
+                }
+            },
+            error: function () {
+                console.error("❌ Failed to refresh candidate cards.");
+            }
+        });
+    }
+
 
     //Load Prizes List
     $("#prizeListBtn").click(function () {
@@ -203,5 +247,95 @@ $(document).ready(function () {
             }
         });
     });
+    refreshCandidateCards();
+
+    // Load Prizes for Draw Modal
+    $("#drawBtn").click(function () {
+        loadDrawPrizes();
+        $('#drawModal').modal('show');
+    });
+
+    function loadDrawPrizes() {
+        $("#drawPrizeBody").html('<tr><td colspan="3">Loading...</td></tr>');
+        $.ajax({
+            url: prizeUrls.get,
+            type: "GET",
+            data: { id: luckyDrawId },
+            cache: false,
+            success: function (response) {
+                $("#drawPrizeBody").empty();
+                if (response && response.length > 0) {
+                    $.each(response, function (index, p) {
+                        $("#drawPrizeBody").append(`
+                        <tr data-id="${p.Id}">
+                            <td>${p.NamePrize}</td>
+                            <td>${p.Quantity}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary draw-prize-btn">Draw</button>
+                            </td>
+                        </tr>
+                    `);
+                    });
+                } else {
+                    $("#drawPrizeBody").append('<tr><td colspan="3">No prizes available.</td></tr>');
+                }
+            },
+            error: function () {
+                $("#drawPrizeBody").html('<tr><td colspan="3">Error loading prizes.</td></tr>');
+            }
+        });
+    }
+
+    // Xử lý click Draw cho prize
+    $(document).on("click", ".draw-prize-btn", function () {
+        var prizeId = $(this).closest("tr").data("id");
+        var prizeName = $(this).closest("tr").find("td:first").text();
+
+        // Đóng modal draw
+        $('#drawModal').modal('hide');
+
+        // Bắt đầu animation draw
+        startDrawAnimation(prizeName);
+    });
+
+    // Animation Draw: Highlight lần lượt các cards, dừng random
+    function startDrawAnimation(prizeName) {
+        // Lấy tất cả cards
+        var cards = $(".candidate-card").toArray();
+        if (cards.length === 0) {
+            alert("No candidates available to draw.");
+            return;
+        }
+
+        // Xóa highlight cũ
+        $(".candidate-card").removeClass("highlight winner");
+
+        var speed = 200; // Tốc độ ban đầu (ms)
+        var minSpeed = 50; // Tốc độ nhanh nhất
+        var rounds = 5; // Số vòng chạy (mỗi vòng qua hết cards)
+        var totalSteps = cards.length * rounds + Math.floor(Math.random() * cards.length); // Tổng steps, dừng random
+
+        var currentStep = 0;
+        var interval = setInterval(function () {
+            // Xóa highlight cũ
+            $(".candidate-card").removeClass("highlight");
+
+            // Highlight card hiện tại
+            var currentIndex = currentStep % cards.length;
+            $(cards[currentIndex]).addClass("highlight");
+
+            // Giảm tốc độ dần (tăng độ chậm khi gần dừng)
+            speed = Math.max(minSpeed, speed - 5); // Giảm tốc độ
+
+            currentStep++;
+            if (currentStep >= totalSteps) {
+                clearInterval(interval);
+                // Mark winner
+                $(cards[currentIndex]).removeClass("highlight").addClass("winner");
+                alert("Chúc mừng! Người trúng phần thưởng '" + prizeName + "' là: " + $(cards[currentIndex]).find(".candidate-name").text());
+                // Có thể gọi API để lưu winner nếu cần
+            }
+        }, speed);
+    }
 
 });

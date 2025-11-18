@@ -196,6 +196,7 @@
     <Content Include="Views\LuckyDraw\Details.cshtml" />
     <Content Include="Views\LuckyDraw\_CandidateModal.cshtml" />
     <Content Include="Views\LuckyDraw\_PrizeModal.cshtml" />
+    <Content Include="Views\LuckyDraw\_DrawModal.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

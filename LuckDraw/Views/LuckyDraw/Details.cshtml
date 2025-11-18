@@ -57,6 +57,14 @@
         margin-top: 5px;
     }
 
+    .candidate-card.highlight {
+        background-color: #90ee90 !important; 
+        transform: scale(1.05); 
+    }
+
+    .candidate-card.winner {
+        border: 2px solid red;
+    }
 </style>
 
 <div class="container-fluid" style="color:black; padding:40px 60px;">
@@ -69,7 +77,7 @@
             <div class="candidate-grid">
                 @foreach (var c in Model.Candidates)
                 {
-                    <div class="candidate-card">
+                    <div class="candidate-card" data-id="@c.Id">
                         <div class="candidate-name">@c.FullName</div>
                         <div class="candidate-dept">@c.Department</div>
                     </div>
@@ -91,6 +99,7 @@
 <!-- Import Partial Modals -->
 @Html.Partial("_CandidateModal")
 @Html.Partial("_PrizeModal")
+@Html.Partial("_DrawModal")
 
 <!--External JS config -->
 @section scripts {
